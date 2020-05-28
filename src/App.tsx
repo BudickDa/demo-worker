@@ -2,11 +2,13 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import './App.css';
 import {RootState} from "./redux/reducers";
-import {sendMessage} from "./redux/actions";
+import {loadFriends, makeError, sendMessage} from "./redux/actions";
 import {ConnectionsWorker} from "./modules/connections/worker";
 
 interface AppPropsType {
     sendMessage: Function
+    loadFriends: Function
+    fail: Function
 }
 
 interface AppStateType {
@@ -19,11 +21,15 @@ class App extends Component <AppPropsType, AppStateType> {
     };
 
     componentDidMount(): void {
-        this.load().catch(console.error);
+        this.load().catch((err) => {
+            console.log("Does not load friends in App.tsx, but throws:");
+            console.error(err);
+        });
     }
 
     load = async () => {
-        const friends = await ConnectionsWorker.getFriends();
+        const friends = await ConnectionsWorker.getConnections();
+        console.log("Should load friends:", friends.join(", "));
         this.setState({friends});
     };
 
@@ -31,9 +37,11 @@ class App extends Component <AppPropsType, AppStateType> {
         return <div className="App">
             <h2>Friends</h2>
             <ul>
-                {this.state.friends.map((name: string) => <li>{name}</li>)}
+                {this.state.friends.map((name: string) => <li key={`app-list-${name}`}>{name}</li>)}
             </ul>
             <button onClick={() => (this.props.sendMessage("ABCD"))}>Send</button>
+            <button onClick={() => (this.props.loadFriends())}>Load friends by hand</button>
+            <button onClick={() => (this.props.fail())}>Create error</button>
         </div>;
     }
 }
@@ -44,7 +52,9 @@ function mapStateToProps(state: RootState) {
 
 function mapDispatchToProps(dispatch: Function) {
     return {
-        sendMessage: (message: string) => (dispatch(sendMessage(message)))
+        sendMessage: (message: string) => (dispatch(sendMessage(message))),
+        loadFriends: () => (dispatch(loadFriends())),
+        fail: () => (dispatch(makeError("Message")))
     };
 }
 

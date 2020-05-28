@@ -1,6 +1,5 @@
 export interface ConnectionsWorkerType {
-    getFriends: () => Promise<string[]>
-    getFriendBatch: (uids: string[]) => Promise<string[]>
+    getConnections: () => Promise<string[]>
 }
 
 
