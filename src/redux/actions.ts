@@ -1,12 +1,14 @@
-import {MessageWorker} from "../modules/messages/worker";
 import {ConnectionsWorker} from "../modules/connections/worker";
-import {getConnections} from "../modules/connections/worker/Connections";
+import {MessageWorker, P2PWorker} from "../modules/p2p/worker";
 
 export function sendMessage(message: string) {
     return async (dispatch: Function, getState: Function) => {
         const encryptedMessage = await MessageWorker.encrypt(message);
-        //send message...
         console.log(encryptedMessage);
+        //send message...
+        await P2PWorker.sendMessage(encryptedMessage);
+
+
     };
 }
 
@@ -23,7 +25,7 @@ export function loadFriends() {
     };
 }
 
-export function makeError(message: string) {
+export function encryptMessage(message: string) {
     return async (dispatch: Function, getState: Function) => {
         const encryptedMessage = await MessageWorker.encryptWithFriends(message);
         //send message...
